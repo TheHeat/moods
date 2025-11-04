@@ -1,0 +1,10 @@
+{
+  "name": "moods-visualization",
+  "version": "1.0.0",
+  "description": "D3.js stacked area chart for moods data",
+  "type": "module",
+  "scripts": {
+    "serve": "python3 -m http.server 8000",
+    "serve-node": "npx http-server -p 8000"
+  }
+}
