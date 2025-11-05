@@ -10,7 +10,7 @@ const moodsData = await d3.csv("MoodsFreshCycle.csv", (d) => ({
 }));
 
 // Set up dimensions and margins
-const margin = { top: 40, right: 80, bottom: 60, left: 60 };
+const margin = { top: 40, right: 40, bottom: 60, left: 60 };
 const width = 1000 - margin.left - margin.right;
 const height = 500 - margin.top - margin.bottom;
 
@@ -34,7 +34,7 @@ const moodKeys = ["Threat", "Harm", "Challenge", "Benefit"];
 const colorScale = d3
 	.scaleOrdinal()
 	.domain(moodKeys)
-	.range(["green", "pink", "purple", "blue"]);
+	.range(["#d16f1eff", "#8538b6ff", "#32b681ff", "#46a8d8ff"]);
 
 // Process data for stacking
 const processedData = moodsData.map((d) => ({
@@ -48,7 +48,7 @@ const processedData = moodsData.map((d) => ({
 const stack = d3
 	.stack()
 	.keys(moodKeys)
-	.order(d3.stackOrderAscending)
+	.order(d3.stackOrderDefault)
 	.offset(d3.stackOffsetNone);
 
 const stackedData = stack(processedData);
@@ -272,21 +272,70 @@ const overlay = g
 			.html(
 				`
 							<div class="tooltip-title">${`[${closest.day}] ${closest.dayLabel}`}</div>
-							${tooltipItems
-								.map(
-									(d) => `
-										<div class="tooltip-item">
-											<span style="color: ${colorScale(d.key)}">●</span>
-											${d.key}: ${d.value.toFixed(2)}
-										</div>
-									`
-								)
-								.join("")}
-							<div class="tooltip-item" style="margin-top: 5px; padding-top: 5px; border-top: 1px solid rgba(255,255,255,0.3);">
-								<strong>Total: ${totalVisible.toFixed(2)}</strong>
+							<div class="tooltip-content">
+							<div id="tooltip-bar"></div>
+								<div>
+									${tooltipItems
+										.map(
+											(d) => `
+												<div class="tooltip-item">
+													<span style="color: ${colorScale(d.key)}">●</span>
+													${d.key}: ${d.value.toFixed(2)}
+												</div>
+											`
+										)
+										.join("")}
+									<div class="tooltip-item" style="margin-top: 5px; padding-top: 5px; border-top: 1px solid rgba(255,255,255,0.3);">
+										<strong>Total: ${totalVisible.toFixed(2)}</strong>
+									</div>
+								</div>
 							</div>
 				`
 			)
+			.call((tooltip) => {
+				// Clear any existing chart
+				d3.select("#tooltip-bar").selectAll("*").remove();
+
+				// Create 100% stacked bar
+				const barWidth = 160;
+				const barHeight = 20;
+
+				// Calculate percentages
+				const total = tooltipItems.reduce((sum, item) => sum + item.value, 0);
+				let cumulative = 0;
+
+				const barData = tooltipItems.map((item) => {
+					const percentage = item.value / total;
+					const start = cumulative;
+					cumulative += percentage;
+					return {
+						key: item.key,
+						start,
+						end: cumulative,
+						value: item.value,
+					};
+				});
+
+				const barSvg = d3
+					.select("#tooltip-bar")
+					.append("svg")
+					.attr("width", barWidth)
+					.attr("height", barHeight);
+
+				// Create segments
+				barSvg
+					.selectAll("rect")
+					.data(barData)
+					.enter()
+					.append("rect")
+					.attr("x", (d) => d.start * barWidth)
+					.attr("y", 0)
+					.attr("width", (d) => (d.end - d.start) * barWidth)
+					.attr("height", barHeight)
+					.attr("fill", (d) => colorScale(d.key))
+					.attr("stroke", "white")
+					.attr("stroke-width", "1px");
+			})
 			.style("opacity", 1);
 	})
 	.on("mouseout", function () {
