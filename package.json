@@ -1,10 +1,16 @@
 {
-  "name": "moods-visualization",
-  "version": "1.0.0",
-  "description": "D3.js stacked area chart for moods data",
-  "type": "module",
-  "scripts": {
-    "serve": "python3 -m http.server 8000",
-    "serve-node": "npx http-server -p 8000"
-  }
+	"name": "moods-visualization",
+	"version": "1.0.0",
+	"description": "D3.js stacked area chart for moods data",
+	"type": "module",
+	"scripts": {
+		"serve": "python3 -m http.server 8000",
+		"serve-node": "npx http-server -p 8000",
+		"prepare:pages": "node ./scripts/prepare-pages.js",
+		"deploy": "npm run prepare:pages && npx gh-pages -d publish",
+		"preview": "npx serve publish -p 5000"
+	},
+	"devDependencies": {
+		"gh-pages": "^4.0.0"
+	}
 }
