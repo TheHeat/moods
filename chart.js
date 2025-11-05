@@ -1,5 +1,13 @@
-// Import the moods data
-import moodsData from "./moodsData.js";
+// Load and process the CSV data
+const moodsData = await d3.csv("MoodsFreshCycle.csv", (d) => ({
+	Day: +d.day,
+	DayLabel: d.dayLabel,
+	VarName: d.varName,
+	Threat: +d.Threat,
+	Harm: +d.Harm,
+	Challenge: +d.Challenge,
+	Benefit: +d.Benefit,
+}));
 
 // Set up dimensions and margins
 const margin = { top: 40, right: 80, bottom: 60, left: 60 };
