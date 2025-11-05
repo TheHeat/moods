@@ -28,10 +28,31 @@ h1 {
 	gap: 1em;
 }
 
+.legend-wrapper {
+	display: grid;
+	gap: 1em;
+	justify-items: center;
+}
+
 .legend-item {
+	/* legend entries are buttons now: keep layout but remove default button chrome */
 	display: flex;
 	align-items: center;
 	gap: 0.5em;
+	background: none;
+	border: none;
+	padding: 0.25em 0.5em;
+	margin: 0;
+	color: inherit;
+	font: inherit;
+	cursor: pointer;
+}
+
+/* Visible focus state for keyboard users */
+.legend-item:focus {
+	outline: 3px solid rgba(33, 133, 208, 0.25);
+	outline-offset: 2px;
+	border-radius: 6px;
 }
 
 .legend-color {

@@ -285,7 +285,7 @@ const overlay = g
 											`
 										)
 										.join("")}
-									<div class="tooltip-item" style="margin-top: 5px; padding-top: 5px; border-top: 1px solid rgba(255,255,255,0.3);">
+									<div class="tooltip-item">
 										<strong>Total: ${totalVisible.toFixed(2)}</strong>
 									</div>
 								</div>
@@ -345,22 +345,25 @@ const overlay = g
 // Create legend in the same order as the stack (ascending order, reversed to show top-to-bottom)
 const legend = d3.select("#legend");
 stackedKeys.forEach((key) => {
+	// Use a real button for better semantics and keyboard accessibility
 	const item = legend
-		.append("div")
+		.append("button")
+		.attr("type", "button")
 		.attr("class", "legend-item")
-		.style("cursor", "pointer")
+		// initialize aria-pressed to true since all series start visible
+		.attr("aria-pressed", "true")
 		.on("click", function () {
 			const isVisible = visibleKeys.has(key);
 			if (isVisible) {
 				visibleKeys.delete(key);
-				d3.select(this).style("opacity", 0.4);
+				d3.select(this).style("opacity", 0.4).attr("aria-pressed", "false");
 				g.selectAll(".layer")
 					.filter((d) => d.key === key)
 					.style("display", "none");
 				updateStackAndRender();
 			} else {
 				visibleKeys.add(key);
-				d3.select(this).style("opacity", 1);
+				d3.select(this).style("opacity", 1).attr("aria-pressed", "true");
 				g.selectAll(".layer")
 					.filter((d) => d.key === key)
 					.style("display", null);
