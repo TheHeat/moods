@@ -16,6 +16,29 @@
 	<body>
 		<div class="container">
 			<h1>Fresh Cycle Reported Moods</h1>
+
+			<!-- Chart switcher -->
+			<div
+				class="chart-switcher"
+				role="tablist"
+				aria-label="Chart type"
+			>
+				<button
+					id="btn-stacked"
+					class="chart-switch"
+					aria-pressed="true"
+				>
+					Stacked areas
+				</button>
+				<button
+					id="btn-lines"
+					class="chart-switch"
+					aria-pressed="false"
+				>
+					Lines
+				</button>
+			</div>
+
 			<div id="chart"></div>
 
 			<div class="legend-wrapper">
@@ -32,9 +55,55 @@
 			id="tooltip"
 		></div>
 
-		<script
-			type="module"
-			src="./chart.js"
-		></script>
+		<script type="module">
+			// Dynamic chart loader: clears chart and legend, then imports the requested chart module.
+			const chartMap = {
+				stacked: "./chartStackedAreas.js",
+				lines: "./chartLines.js",
+			};
+
+			const chartEl = document.getElementById("chart");
+			const legendEl = document.getElementById("legend");
+			const tooltipEl = document.getElementById("tooltip");
+
+			function clearPrevious() {
+				// Remove chart and legend contents. Modules append into these containers when run.
+				chartEl.innerHTML = "";
+				legendEl.innerHTML = "";
+				// hide tooltip
+				if (tooltipEl) tooltipEl.style.opacity = 0;
+			}
+
+			async function loadChart(kind) {
+				if (!chartMap[kind]) return;
+				// Update button pressed states
+				document.querySelectorAll(".chart-switch").forEach((b) => {
+					const isActive =
+						b.id === `btn-${kind}` ||
+						(kind === "stacked" && b.id === "btn-stacked");
+					b.setAttribute("aria-pressed", isActive ? "true" : "false");
+				});
+
+				clearPrevious();
+				// Dynamic import with cache-busting so repeated loads re-run module top-level code
+				const path = chartMap[kind] + "?cache=" + Date.now();
+				try {
+					await import(path);
+				} catch (err) {
+					console.error("Failed to load chart module", path, err);
+				}
+			}
+
+			// Wire up buttons
+			document
+				.getElementById("btn-stacked")
+				.addEventListener("click", () => loadChart("stacked"));
+			document
+				.getElementById("btn-lines")
+				.addEventListener("click", () => loadChart("lines"));
+
+			// Load default chart
+			loadChart("stacked");
+		</script>
 	</body>
 </html>
